@@ -3,12 +3,13 @@ name: npm publish
 on:
   pull_request:
     branches:
-      - master
+      - master, development
     paths:
       - package.json
 
 jobs:
   build:
+    if: contains('refs/heads/development refs/heads/master', github.ref)
     runs-on: ubuntu-latest
     steps:
       - name: ⬇️ Checkout source code
@@ -20,12 +21,8 @@ jobs:
           node-version: 12
           registry-url: https://registry.npmjs.org/
 
-      - name: 🏗 Publish npm
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
-
       - name: 📤 Send Notification to Slack
+        if: github.ref == 'refs/heads/master'
         uses: 8398a7/action-slack@v2.6.0
         with:
           status: ${{ job.status }}
